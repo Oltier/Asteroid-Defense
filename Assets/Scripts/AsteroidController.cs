@@ -2,10 +2,11 @@
 
 public class AsteroidController : MonoBehaviour
 {
-    public Rigidbody Asteroid;
+    public Rigidbody RealAsteroid;
+    public Rigidbody AsteroidGhost;
     
     private LineRenderer _lineRenderer;
-    private Rigidbody _asteroid;
+    private Rigidbody _asteroidGhost;
     
     public void Start()
     {
@@ -25,7 +26,7 @@ public class AsteroidController : MonoBehaviour
             _lineRenderer.SetPosition(0, _initialPosition);
             _lineRenderer.positionCount = 1;
             _lineRenderer.enabled = true;
-            _asteroid = Instantiate(Asteroid, _initialPosition, Quaternion.identity);
+            _asteroidGhost = Instantiate(AsteroidGhost, _initialPosition, Quaternion.identity);
         } 
         else if (Input.GetMouseButton(0))
         {
@@ -39,7 +40,9 @@ public class AsteroidController : MonoBehaviour
             _lineRenderer.enabled = false;
             Vector3 releasePosition = GetCurrentMousePosition().GetValueOrDefault();
             Vector3 direction = releasePosition - _initialPosition;
-            _asteroid.velocity = -direction;
+            Rigidbody asteroid = Instantiate(RealAsteroid, _initialPosition, Quaternion.identity);
+            asteroid.velocity = -direction;
+            Destroy(_asteroidGhost.gameObject);
         }
     }
  
