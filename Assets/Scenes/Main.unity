@@ -439,7 +439,7 @@ MonoBehaviour:
     type: 2}
   Earth: {fileID: 1600867736}
   Missile: {fileID: 54350027036044990, guid: 895b8fee323d14b32a8639a4a3836033, type: 2}
-  MissileSpeed: 2
+  MissileSpeed: 5
 --- !u!4 &1046065470
 Transform:
   m_ObjectHideFlags: 0

@@ -67,12 +67,12 @@ public class GameController : MonoBehaviour
 
             if (Earth != null)
             {
-                Debug.Log("Trajectory will be in SafetyZone " +
-                          TrajectoryWithinSafetyZone(asteroid.position, asteroid.velocity));
+//                Debug.Log("Trajectory will be in SafetyZone " +
+//                          TrajectoryWithinSafetyZone(asteroid.position, asteroid.velocity));
                 if (TrajectoryWithinSafetyZone(asteroid.position, asteroid.velocity))
                 {
                     Rigidbody missile = Instantiate(Missile, Vector3.zero, Quaternion.identity);
-                    missile.velocity = CalculateMissileVelocity(asteroid.position, asteroid.velocity) * MissileSpeed;
+                    missile.velocity = CalculateMissileVelocity(asteroid.position, asteroid.velocity);
                 }
             }
         }
@@ -98,12 +98,26 @@ public class GameController : MonoBehaviour
 
     private Vector3 CalculateMissileVelocity(Vector3 asteroidPosition, Vector3 asteroidVelocity)
     {
-        QuadraticParameters q = GetQuadraticParameters(asteroidPosition, asteroidVelocity);
-        float d = q.b * q.b - 4 * q.a * q.c;
+        Vector3 targetDirection = Vector3.Normalize(asteroidPosition - Earth.position);
+        Vector3 targetVelOrth = Vector3.Dot(asteroidVelocity, targetDirection) * targetDirection;
 
-        float x1 = Convert.ToSingle(-q.b - Math.Sqrt(d)) / (2 * q.a);
+        Vector3 targetVelTang = asteroidVelocity - targetVelOrth;
 
-        return asteroidPosition + x1 * asteroidVelocity;
+        Vector3 shotVelTang = targetVelTang;
+
+        float shotVelSpeed = shotVelTang.magnitude;
+
+        if (shotVelSpeed > MissileSpeed)
+        {
+            return Vector3.zero;
+        }
+        else
+        {
+            float shotSpeedOrth = Mathf.Sqrt(MissileSpeed * MissileSpeed - shotVelSpeed * shotVelSpeed);
+            Vector3 shotVelOrth = targetDirection * shotSpeedOrth;
+
+            return shotVelOrth + shotVelTang;
+        }
     }
 
     private QuadraticParameters GetQuadraticParameters(Vector3 asteroidPosition, Vector3 asteroidVelocity)
@@ -117,6 +131,9 @@ public class GameController : MonoBehaviour
         float radius = safetyZoneBoundExtent.x;
 
         Vector3 q = asteroidPosition - earthCenter;
+        
+        Debug.Log(q);
+        
         float a = Vector3.Dot(asteroidVelocity, asteroidVelocity);
         float b = 2 * Vector3.Dot(asteroidVelocity, q);
         float c = Vector3.Dot(q, q) - radius * radius;
