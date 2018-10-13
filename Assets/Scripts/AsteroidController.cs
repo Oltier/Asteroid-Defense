@@ -1,13 +1,16 @@
 ﻿using UnityEngine;
 
-public class MyGameController : MonoBehaviour
+public class AsteroidController : MonoBehaviour
 {
+    public Rigidbody Asteroid;
+    
     private LineRenderer _lineRenderer;
+    
     public void Start()
     {
         _lineRenderer = gameObject.AddComponent<LineRenderer>();
-        _lineRenderer.startWidth = 0.2f;
-        _lineRenderer.endWidth = 0.2f;
+        _lineRenderer.startWidth = 0.1f;
+        _lineRenderer.endWidth = 0.1f;
         _lineRenderer.enabled = false;
     }
  
@@ -25,15 +28,17 @@ public class MyGameController : MonoBehaviour
         else if (Input.GetMouseButton(0))
         {
             _currentPosition = GetCurrentMousePosition().GetValueOrDefault();
+            Vector3 distance = _currentPosition - _initialPosition;
             _lineRenderer.positionCount = 2;
-//            _lineRenderer.SetPosition(1, Vector3.Dot(Vector3.Dot(_currentPosition, Vector3.back), Vector3.left));
-//            Debug.Log(_initialPosition + " " + _currentPosition);
+            _lineRenderer.SetPosition(1, _initialPosition - distance);
         } 
         else if (Input.GetMouseButtonUp(0))
         {
             _lineRenderer.enabled = false;
-            var releasePosition = GetCurrentMousePosition().GetValueOrDefault();
-            var direction = releasePosition - _initialPosition;
+            Vector3 releasePosition = GetCurrentMousePosition().GetValueOrDefault();
+            Vector3 direction = releasePosition - _initialPosition;
+            Rigidbody asteroid = Instantiate(Asteroid, _initialPosition, Quaternion.identity);
+            asteroid.velocity = -direction;
         }
     }
  
@@ -44,6 +49,5 @@ public class MyGameController : MonoBehaviour
         if (Camera.main == null) return null;
         Vector3 position = Camera.main.ScreenToWorldPoint(mousePosition); 
         return position;
-
     }
 }
