@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DestroyByContact : MonoBehaviour
+public class DestroyEarthByContact : MonoBehaviour
 {
 
 	private int _collisionCounter;

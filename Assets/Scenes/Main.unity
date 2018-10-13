@@ -416,7 +416,7 @@ GameObject:
   - component: {fileID: 1046065470}
   - component: {fileID: 1046065469}
   m_Layer: 0
-  m_Name: AsteroidController
+  m_Name: GameController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -437,6 +437,9 @@ MonoBehaviour:
     type: 2}
   AsteroidGhost: {fileID: 54537497128358390, guid: 6a1724c684f54476ca2c5280f5cf910e,
     type: 2}
+  Earth: {fileID: 1600867736}
+  Missile: {fileID: 54350027036044990, guid: 895b8fee323d14b32a8639a4a3836033, type: 2}
+  MissileSpeed: 2
 --- !u!4 &1046065470
 Transform:
   m_ObjectHideFlags: 0
@@ -615,13 +618,14 @@ GameObject:
   - component: {fileID: 1600867732}
   - component: {fileID: 1600867731}
   - component: {fileID: 1600867735}
+  - component: {fileID: 1600867736}
   m_Layer: 0
   m_Name: Earth
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!135 &1600867731
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -632,7 +636,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 2
+  m_Radius: 1.5
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &1600867732
 MeshRenderer:
@@ -696,8 +700,23 @@ SphereCollider:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1600867730}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!54 &1600867736
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1600867730}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
