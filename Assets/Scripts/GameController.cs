@@ -1,19 +1,7 @@
 ﻿using System;
 using System.Linq;
+using UnityEditor.Experimental.UIElements;
 using UnityEngine;
-
-
-class QuadraticParameters
-{
-    public float a, b, c;
-
-    public QuadraticParameters(float a, float b, float c)
-    {
-        this.a = a;
-        this.b = b;
-        this.c = c;
-    }
-}
 
 public class GameController : MonoBehaviour
 {
@@ -65,15 +53,13 @@ public class GameController : MonoBehaviour
             asteroid.velocity = -direction;
             Destroy(_asteroidGhost.gameObject);
 
-            if (Earth != null)
-            {
+            if (Earth == null) return;
 //                Debug.Log("Trajectory will be in SafetyZone " +
 //                          TrajectoryWithinSafetyZone(asteroid.position, asteroid.velocity));
-                if (TrajectoryWithinSafetyZone(asteroid.position, asteroid.velocity))
-                {
-                    Rigidbody missile = Instantiate(Missile, Vector3.zero, Quaternion.identity);
-                    missile.velocity = CalculateMissileVelocity(asteroid.position, asteroid.velocity);
-                }
+            if (TrajectoryWithinSafetyZone(asteroid.position, asteroid.velocity))
+            {
+                Rigidbody missile = Instantiate(Missile, Vector3.zero, Quaternion.identity);
+                missile.velocity = CalculateMissileVelocity(asteroid.position, asteroid.velocity);
             }
         }
     }
@@ -89,11 +75,35 @@ public class GameController : MonoBehaviour
 
     private bool TrajectoryWithinSafetyZone(Vector3 asteroidPosition, Vector3 asteroidVelocity)
     {
-        QuadraticParameters q = GetQuadraticParameters(asteroidPosition, asteroidVelocity);
+        Collider safetyZone = Earth.GetComponents<Collider>()
+            .OrderByDescending(earthCollider => earthCollider.bounds.extents.x)
+            .First();
 
-        float d = q.b * q.b - 4 * q.a * q.c;
+        Vector3 earthCenter = safetyZone.bounds.center;
+        Vector3 safetyZoneBoundExtent = safetyZone.bounds.extents;
+        float radius = safetyZoneBoundExtent.x;
 
-        return d >= 0;
+        Vector3 q = asteroidPosition - earthCenter;
+        
+//        Debug.Log(q);
+        
+        float a = Vector3.Dot(asteroidVelocity, asteroidVelocity);
+        float b = 2 * Vector3.Dot(asteroidVelocity, q);
+        float c = Vector3.Dot(q, q) - radius * radius;
+        float d = b * b - 4 * a * c;
+
+        if (d >= 0)
+        {
+            float x1 = (-b + Mathf.Sqrt(d)) / (2 * a);
+            float x2 = (-b - Mathf.Sqrt(d)) / (2 * a);
+        
+//            Debug.Log(x1);
+//            Debug.Log(x2);
+
+            return x1 >= 0 || x2 >= 0;
+        }
+
+        return false;
     }
 
     private Vector3 CalculateMissileVelocity(Vector3 asteroidPosition, Vector3 asteroidVelocity)
@@ -111,33 +121,11 @@ public class GameController : MonoBehaviour
         {
             return Vector3.zero;
         }
-        else
-        {
-            float shotSpeedOrth = Mathf.Sqrt(MissileSpeed * MissileSpeed - shotVelSpeed * shotVelSpeed);
-            Vector3 shotVelOrth = targetDirection * shotSpeedOrth;
 
-            return shotVelOrth + shotVelTang;
-        }
+        float shotSpeedOrth = Mathf.Sqrt(MissileSpeed * MissileSpeed - shotVelSpeed * shotVelSpeed);
+        Vector3 shotVelOrth = targetDirection * shotSpeedOrth;
+
+        return shotVelOrth + shotVelTang;
     }
 
-    private QuadraticParameters GetQuadraticParameters(Vector3 asteroidPosition, Vector3 asteroidVelocity)
-    {
-        Collider safetyZone = Earth.GetComponents<Collider>()
-            .OrderByDescending(earthCollider => earthCollider.bounds.extents.x)
-            .First();
-
-        Vector3 earthCenter = safetyZone.bounds.center;
-        Vector3 safetyZoneBoundExtent = safetyZone.bounds.extents;
-        float radius = safetyZoneBoundExtent.x;
-
-        Vector3 q = asteroidPosition - earthCenter;
-        
-        Debug.Log(q);
-        
-        float a = Vector3.Dot(asteroidVelocity, asteroidVelocity);
-        float b = 2 * Vector3.Dot(asteroidVelocity, q);
-        float c = Vector3.Dot(q, q) - radius * radius;
-
-        return new QuadraticParameters(a, b, c);
-    }
 }
