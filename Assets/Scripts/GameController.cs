@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using UnityEditor.Experimental.UIElements;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
@@ -9,7 +8,7 @@ public class GameController : MonoBehaviour
     public Rigidbody AsteroidGhost;
 
     public Rigidbody Earth;
-    public Rigidbody Missile;
+    public GameObject Missile;
 
     public float MissileSpeed;
 
@@ -54,12 +53,14 @@ public class GameController : MonoBehaviour
             Destroy(_asteroidGhost.gameObject);
 
             if (Earth == null) return;
-//                Debug.Log("Trajectory will be in SafetyZone " +
-//                          TrajectoryWithinSafetyZone(asteroid.position, asteroid.velocity));
+
             if (TrajectoryWithinSafetyZone(asteroid.position, asteroid.velocity))
             {
-                Rigidbody missile = Instantiate(Missile, Vector3.zero, Quaternion.identity);
-                missile.velocity = CalculateMissileVelocity(asteroid.position, asteroid.velocity);
+                Rigidbody missileRb = Missile.GetComponent<Rigidbody>();
+                Vector3 missileVelocity = CalculateMissileVelocity(asteroid.position, asteroid.velocity);
+                Vector3 missileRotation = new Vector3(0, Mathf.Atan2(missileVelocity.z, missileVelocity.x),0);
+                Rigidbody missileInstance = Instantiate(missileRb, Vector3.zero, Quaternion.Euler(missileRotation));
+                missileInstance.velocity = missileVelocity;
             }
         }
     }
@@ -85,8 +86,6 @@ public class GameController : MonoBehaviour
 
         Vector3 q = asteroidPosition - earthCenter;
         
-//        Debug.Log(q);
-        
         float a = Vector3.Dot(asteroidVelocity, asteroidVelocity);
         float b = 2 * Vector3.Dot(asteroidVelocity, q);
         float c = Vector3.Dot(q, q) - radius * radius;
@@ -96,9 +95,6 @@ public class GameController : MonoBehaviour
         {
             float x1 = (-b + Mathf.Sqrt(d)) / (2 * a);
             float x2 = (-b - Mathf.Sqrt(d)) / (2 * a);
-        
-//            Debug.Log(x1);
-//            Debug.Log(x2);
 
             return x1 >= 0 || x2 >= 0;
         }
@@ -119,7 +115,8 @@ public class GameController : MonoBehaviour
 
         if (shotVelSpeed > MissileSpeed)
         {
-            return Vector3.zero;
+            //We won't be able to catch the asteroid but try to do our best.
+            return asteroidVelocity.normalized * MissileSpeed;
         }
 
         float shotSpeedOrth = Mathf.Sqrt(MissileSpeed * MissileSpeed - shotVelSpeed * shotVelSpeed);
