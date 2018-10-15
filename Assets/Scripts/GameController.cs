@@ -58,7 +58,8 @@ public class GameController : MonoBehaviour
             {
                 Rigidbody missileRb = Missile.GetComponent<Rigidbody>();
                 Vector3 missileVelocity = CalculateMissileVelocity(asteroid.position, asteroid.velocity);
-                Vector3 missileRotation = new Vector3(0, Mathf.Atan2(missileVelocity.z, missileVelocity.x),0);
+                float yRotation = -Mathf.Atan2(missileVelocity.z, missileVelocity.x) * (180 / Mathf.PI);
+                Vector3 missileRotation = new Vector3(0, yRotation,0);
                 Rigidbody missileInstance = Instantiate(missileRb, Vector3.zero, Quaternion.Euler(missileRotation));
                 missileInstance.velocity = missileVelocity;
             }
