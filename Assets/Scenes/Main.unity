@@ -798,7 +798,7 @@ MonoBehaviour:
     type: 2}
   Earth: {fileID: 182335141}
   Missile: {fileID: 1374693194890512, guid: 285fd8dbd96cfab43b28b8e12386178d, type: 2}
-  MissileSpeed: 5
+  MissileSpeed: 10
   GameOverRestartText: {fileID: 175140799}
 --- !u!4 &1046065470
 Transform:

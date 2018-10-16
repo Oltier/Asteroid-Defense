@@ -16,15 +16,15 @@ public class GameController : MonoBehaviour
 
     public Text GameOverRestartText;
 
-    private LineRenderer _lineRenderer;
+    private LineRenderer _shotDirectionLineRenderer;
     private Rigidbody _asteroidGhost;
 
     public void Start()
     {
-        _lineRenderer = gameObject.AddComponent<LineRenderer>();
-        _lineRenderer.startWidth = 0.1f;
-        _lineRenderer.endWidth = 0.1f;
-        _lineRenderer.enabled = false;
+        _shotDirectionLineRenderer = gameObject.AddComponent<LineRenderer>();
+        _shotDirectionLineRenderer.startWidth = 0.1f;
+        _shotDirectionLineRenderer.endWidth = 0.1f;
+        _shotDirectionLineRenderer.enabled = false;
         GameOverRestartText.text = "";
     }
 
@@ -50,25 +50,25 @@ public class GameController : MonoBehaviour
         {
             _initialPosition = GetCurrentMousePosition().GetValueOrDefault();
             if (AsteroidInitialPositionWithinSafeZone(_initialPosition)) return;
-            _lineRenderer.SetPosition(0, _initialPosition);
-            _lineRenderer.positionCount = 1;
-            _lineRenderer.enabled = true;
+            _shotDirectionLineRenderer.SetPosition(0, _initialPosition);
+            _shotDirectionLineRenderer.positionCount = 1;
+            _shotDirectionLineRenderer.enabled = true;
             _asteroidGhost = Instantiate(AsteroidGhost, _initialPosition, Quaternion.identity);
         }
         else if (Input.GetMouseButton(0) && !AsteroidInitialPositionWithinSafeZone(_initialPosition))
         {
             _currentPosition = GetCurrentMousePosition().GetValueOrDefault();
             Vector3 distance = _currentPosition - _initialPosition;
-            _lineRenderer.positionCount = 2;
-            _lineRenderer.SetPosition(1, _initialPosition - distance);
+            _shotDirectionLineRenderer.positionCount = 2;
+            _shotDirectionLineRenderer.SetPosition(1, _initialPosition - distance);
         }
         else if (Input.GetMouseButtonUp(0) && !AsteroidInitialPositionWithinSafeZone(_initialPosition))
         {
-            _lineRenderer.enabled = false;
+            _shotDirectionLineRenderer.enabled = false;
             Vector3 releasePosition = GetCurrentMousePosition().GetValueOrDefault();
-            Vector3 direction = releasePosition - _initialPosition;
+            Vector3 direction = _initialPosition - releasePosition;
             Rigidbody asteroid = Instantiate(RealAsteroid, _initialPosition, Quaternion.identity);
-            asteroid.velocity = -direction;
+            asteroid.velocity = direction;
             Destroy(_asteroidGhost.gameObject);
 
             if (TrajectoryWithinSafetyZone(asteroid.position, asteroid.velocity))
@@ -77,8 +77,8 @@ public class GameController : MonoBehaviour
                 Vector3 missileVelocity = CalculateMissileVelocity(asteroid.position, asteroid.velocity);
                 float yRotation = -Mathf.Atan2(missileVelocity.z, missileVelocity.x) * (180 / Mathf.PI);
                 Vector3 missileRotation = new Vector3(0, yRotation, 0);
-                Rigidbody missileInstance = Instantiate(missileRb, Vector3.zero, Quaternion.Euler(missileRotation));
-                missileInstance.velocity = missileVelocity;
+                Rigidbody missile = Instantiate(missileRb, Earth.position, Quaternion.Euler(missileRotation));
+                missile.velocity = missileVelocity;
             }
         }
     }
@@ -99,25 +99,25 @@ public class GameController : MonoBehaviour
             .First();
 
         Vector3 earthCenter = Earth.position;
-        Vector3 safetyZoneBoundExtent = safetyZone.bounds.extents;
-        float radius = safetyZoneBoundExtent.x;
+        float safetyZoneRadius = safetyZone.bounds.extents.x;
 
-        Vector3 q = asteroidPosition - earthCenter;
+        Vector3 earthToAsteroid = asteroidPosition - earthCenter;
 
-        float a = Vector3.Dot(asteroidVelocity, asteroidVelocity);
-        float b = 2 * Vector3.Dot(asteroidVelocity, q);
-        float c = Vector3.Dot(q, q) - radius * radius;
-        float d = b * b - 4 * a * c;
+        float a = asteroidVelocity.magnitude;
+        float b = 2 * Vector3.Dot(asteroidVelocity, earthToAsteroid);
+        float c = earthToAsteroid.magnitude - Mathf.Pow(safetyZoneRadius, 2);
+        
+        float discriminant = Mathf.Pow(b, 2) - 4 * a * c;
 
-        if (d >= 0)
-        {
-            float x1 = (-b + Mathf.Sqrt(d)) / (2 * a);
-            float x2 = (-b - Mathf.Sqrt(d)) / (2 * a);
+        if (discriminant < 0) return false; // There is no real solution to the equation, so no tangient/intersection
+        
+        // Solve quadratic equation to get the two intersection point.
+        float x1 = (-b + Mathf.Sqrt(discriminant)) / (2 * a);
+        float x2 = (-b - Mathf.Sqrt(discriminant)) / (2 * a);
 
-            return x1 >= 0 || x2 >= 0;
-        }
+        // Return true if either solution is >= 0. Meaning that the Asteroid is moving towards one of the intersection points, or is already on it.
+        return x1 >= 0 || x2 >= 0;
 
-        return false;
     }
 
     private Vector3 CalculateMissileVelocity(Vector3 asteroidPosition, Vector3 asteroidVelocity)
@@ -148,7 +148,7 @@ public class GameController : MonoBehaviour
         Collider safetyZone = Earth.GetComponents<Collider>()
             .OrderByDescending(earthCollider => earthCollider.bounds.extents.x)
             .First();
-        
+
         float radius = safetyZone.bounds.extents.x;
         Vector3 earthCenter = Earth.position;
 
