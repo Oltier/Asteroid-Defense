@@ -25,6 +25,7 @@ GameObject:
   - component: {fileID: 136322306260471584}
   - component: {fileID: 114999067694136994}
   - component: {fileID: 114748578969265228}
+  - component: {fileID: 114862511031986042}
   m_Layer: 0
   m_Name: Asteroid
   m_TagString: Dangerous
@@ -114,6 +115,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Explosion: {fileID: 100008, guid: a93496017806b7740910df5fd946f306, type: 2}
+--- !u!114 &114862511031986042
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1203285554015878}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4bd00311f20f4155a229ad6c28d0a1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LifeTime: 5
 --- !u!114 &114999067694136994
 MonoBehaviour:
   m_ObjectHideFlags: 1
