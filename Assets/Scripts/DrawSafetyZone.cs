@@ -23,20 +23,21 @@ public class DrawSafetyZone : MonoBehaviour
         _safetyZone.endColor = new Color(1f, 0f, 0f, 0.5f);
         _safetyZone.positionCount = Segments + 1;
         
-        CreatePoints(safetyZoneXRadius, safetyZoneZRadius);
+        CreatePoints(safetyZoneXRadius, safetyZoneZRadius, _safetyZone.positionCount);
         _safetyZone.enabled = true;
     }
 
-    private void CreatePoints(float xRadius, float zRadius)
+    private void CreatePoints(float xRadius, float zRadius, int positionCount)
     {
         float angle = 20f;
 
-        for (int i = 0; i < (Segments + 1); i++)
+        for (int i = 0; i < (positionCount); i++)
         {
             float x = Mathf.Sin(Mathf.Deg2Rad * angle) * xRadius;
             float z = Mathf.Cos(Mathf.Deg2Rad * angle) * zRadius;
 
-            _safetyZone.SetPosition(i, new Vector3(x, 0, z));
+            Vector3 safetyZonePosition = new Vector3(gameObject.transform.position.x + x, 0, gameObject.transform.position.z + z);
+            _safetyZone.SetPosition(i, safetyZonePosition);
 
             angle += (360f / Segments);
         }
