@@ -5,6 +5,8 @@ using UnityEngine;
 public class DestroyEarthByContact : MonoBehaviour
 {
 
+	public GameObject Explosion;
+	
 	private int _collisionCounter;
 
 	private void Start()
@@ -19,6 +21,7 @@ public class DestroyEarthByContact : MonoBehaviour
 		if (_collisionCounter < 2) return;
 		Destroy(gameObject);
 		Destroy(other.gameObject);
+		Instantiate(Explosion, other.transform.position, other.transform.rotation);
 	}
 
 	private void OnTriggerExit(Collider other)
