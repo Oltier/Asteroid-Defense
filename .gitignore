@@ -37,7 +37,7 @@ sysinfo.txt
 *.apk
 *.unitypackage
 
-*.git*
+*.git/
 *.idea*
 
 
