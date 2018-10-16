@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class GameController : MonoBehaviour
 
     public float MissileSpeed;
 
+    public Text GameOverRestartText;
+
     private LineRenderer _lineRenderer;
     private Rigidbody _asteroidGhost;
 
@@ -21,6 +24,7 @@ public class GameController : MonoBehaviour
         _lineRenderer.startWidth = 0.1f;
         _lineRenderer.endWidth = 0.1f;
         _lineRenderer.enabled = false;
+        GameOverRestartText.text = "";
     }
 
     private Vector3 _initialPosition;
@@ -30,6 +34,7 @@ public class GameController : MonoBehaviour
     {
         if (Earth == null)
         {
+            GameOverRestartText.text = "Game over! Press 'R' to restart!";
             if (Input.GetKeyDown(KeyCode.R))
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
