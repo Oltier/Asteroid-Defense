@@ -1,6 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
@@ -28,6 +28,18 @@ public class GameController : MonoBehaviour
 
     public void Update()
     {
+        if (Earth == null)
+        {
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            }
+            else
+            {
+                return;
+            }
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
             _initialPosition = GetCurrentMousePosition().GetValueOrDefault();
@@ -52,14 +64,12 @@ public class GameController : MonoBehaviour
             asteroid.velocity = -direction;
             Destroy(_asteroidGhost.gameObject);
 
-            if (Earth == null) return;
-
             if (TrajectoryWithinSafetyZone(asteroid.position, asteroid.velocity))
             {
                 Rigidbody missileRb = Missile.GetComponent<Rigidbody>();
                 Vector3 missileVelocity = CalculateMissileVelocity(asteroid.position, asteroid.velocity);
                 float yRotation = -Mathf.Atan2(missileVelocity.z, missileVelocity.x) * (180 / Mathf.PI);
-                Vector3 missileRotation = new Vector3(0, yRotation,0);
+                Vector3 missileRotation = new Vector3(0, yRotation, 0);
                 Rigidbody missileInstance = Instantiate(missileRb, Vector3.zero, Quaternion.Euler(missileRotation));
                 missileInstance.velocity = missileVelocity;
             }
@@ -86,7 +96,7 @@ public class GameController : MonoBehaviour
         float radius = safetyZoneBoundExtent.x;
 
         Vector3 q = asteroidPosition - earthCenter;
-        
+
         float a = Vector3.Dot(asteroidVelocity, asteroidVelocity);
         float b = 2 * Vector3.Dot(asteroidVelocity, q);
         float c = Vector3.Dot(q, q) - radius * radius;
@@ -125,5 +135,4 @@ public class GameController : MonoBehaviour
 
         return shotVelOrth + shotVelTang;
     }
-
 }
