@@ -101,46 +101,48 @@ public class GameController : MonoBehaviour
         Vector3 earthCenter = Earth.position;
         float safetyZoneRadius = safetyZone.bounds.extents.x;
 
-        Vector3 earthToAsteroid = asteroidPosition - earthCenter;
+        Vector3 earthToAsteroid = Vector3.Normalize(asteroidPosition - earthCenter);
 
         float a = asteroidVelocity.magnitude;
         float b = 2 * Vector3.Dot(asteroidVelocity, earthToAsteroid);
         float c = earthToAsteroid.magnitude - Mathf.Pow(safetyZoneRadius, 2);
-        
+
         float discriminant = Mathf.Pow(b, 2) - 4 * a * c;
 
         if (discriminant < 0) return false; // There is no real solution to the equation, so no tangient/intersection
-        
+
         // Solve quadratic equation to get the two intersection point.
         float x1 = (-b + Mathf.Sqrt(discriminant)) / (2 * a);
         float x2 = (-b - Mathf.Sqrt(discriminant)) / (2 * a);
 
         // Return true if either solution is >= 0. Meaning that the Asteroid is moving towards one of the intersection points, or is already on it.
         return x1 >= 0 || x2 >= 0;
-
     }
 
     private Vector3 CalculateMissileVelocity(Vector3 asteroidPosition, Vector3 asteroidVelocity)
     {
-        Vector3 targetDirection = Vector3.Normalize(asteroidPosition - Earth.position);
-        Vector3 targetVelOrth = Vector3.Dot(asteroidVelocity, targetDirection) * targetDirection;
+        Vector3 earthCenter = Earth.position;
 
-        Vector3 targetVelTang = asteroidVelocity - targetVelOrth;
+        Vector3 directionToAsteroid = Vector3.Normalize(asteroidPosition - earthCenter);
+        Vector3 asteroidVelocityOrthogonal = Vector3.Dot(asteroidVelocity, directionToAsteroid) * directionToAsteroid;
 
-        Vector3 shotVelTang = targetVelTang;
+        Vector3 asteroidVelocityTangential = asteroidVelocity - asteroidVelocityOrthogonal;
 
-        float shotVelSpeed = shotVelTang.magnitude;
+        Vector3 missileVelocityTangential = asteroidVelocityTangential;
 
-        if (shotVelSpeed > MissileSpeed)
+        float asteroidTangentialMagnitude = asteroidVelocityTangential.magnitude;
+
+        if (asteroidTangentialMagnitude > MissileSpeed)
         {
             //We won't be able to catch the asteroid but try to do our best.
             return asteroidVelocity.normalized * MissileSpeed;
         }
 
-        float shotSpeedOrth = Mathf.Sqrt(MissileSpeed * MissileSpeed - shotVelSpeed * shotVelSpeed);
-        Vector3 shotVelOrth = targetDirection * shotSpeedOrth;
+        float missileSpeedOrthogonal =
+            Mathf.Sqrt(Mathf.Pow(MissileSpeed, 2) - Mathf.Pow(asteroidTangentialMagnitude, 2));
+        Vector3 missileVelocityOrthogonal = directionToAsteroid * missileSpeedOrthogonal;
 
-        return shotVelOrth + shotVelTang;
+        return missileVelocityOrthogonal + missileVelocityTangential;
     }
 
     private bool AsteroidInitialPositionWithinSafeZone(Vector3 asteroidInitialPosition)
