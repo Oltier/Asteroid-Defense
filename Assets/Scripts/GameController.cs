@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -27,7 +28,7 @@ public class GameController : MonoBehaviour
         GameOverRestartText.text = "";
     }
 
-    private Vector3 _initialPosition;
+    private Vector3 _initialPosition = Vector3.zero;
     private Vector3 _currentPosition;
 
     public void Update()
@@ -48,19 +49,20 @@ public class GameController : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             _initialPosition = GetCurrentMousePosition().GetValueOrDefault();
+            if (AsteroidInitialPositionWithinSafeZone(_initialPosition)) return;
             _lineRenderer.SetPosition(0, _initialPosition);
             _lineRenderer.positionCount = 1;
             _lineRenderer.enabled = true;
             _asteroidGhost = Instantiate(AsteroidGhost, _initialPosition, Quaternion.identity);
         }
-        else if (Input.GetMouseButton(0))
+        else if (Input.GetMouseButton(0) && !AsteroidInitialPositionWithinSafeZone(_initialPosition))
         {
             _currentPosition = GetCurrentMousePosition().GetValueOrDefault();
             Vector3 distance = _currentPosition - _initialPosition;
             _lineRenderer.positionCount = 2;
             _lineRenderer.SetPosition(1, _initialPosition - distance);
         }
-        else if (Input.GetMouseButtonUp(0))
+        else if (Input.GetMouseButtonUp(0) && !AsteroidInitialPositionWithinSafeZone(_initialPosition))
         {
             _lineRenderer.enabled = false;
             Vector3 releasePosition = GetCurrentMousePosition().GetValueOrDefault();
@@ -96,7 +98,7 @@ public class GameController : MonoBehaviour
             .OrderByDescending(earthCollider => earthCollider.bounds.extents.x)
             .First();
 
-        Vector3 earthCenter = safetyZone.bounds.center;
+        Vector3 earthCenter = Earth.position;
         Vector3 safetyZoneBoundExtent = safetyZone.bounds.extents;
         float radius = safetyZoneBoundExtent.x;
 
@@ -139,5 +141,17 @@ public class GameController : MonoBehaviour
         Vector3 shotVelOrth = targetDirection * shotSpeedOrth;
 
         return shotVelOrth + shotVelTang;
+    }
+
+    private bool AsteroidInitialPositionWithinSafeZone(Vector3 asteroidInitialPosition)
+    {
+        Collider safetyZone = Earth.GetComponents<Collider>()
+            .OrderByDescending(earthCollider => earthCollider.bounds.extents.x)
+            .First();
+        
+        float radius = safetyZone.bounds.extents.x;
+        Vector3 earthCenter = Earth.position;
+
+        return Vector3.Distance(asteroidInitialPosition, earthCenter) <= radius;
     }
 }
