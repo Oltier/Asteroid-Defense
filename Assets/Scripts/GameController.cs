@@ -101,11 +101,11 @@ public class GameController : MonoBehaviour
         Vector3 earthCenter = Earth.position;
         float safetyZoneRadius = safetyZone.bounds.extents.x;
 
-        Vector3 earthToAsteroid = Vector3.Normalize(asteroidPosition - earthCenter);
+        Vector3 earthToAsteroid = asteroidPosition - earthCenter;
 
-        float a = asteroidVelocity.magnitude;
+        float a = asteroidVelocity.sqrMagnitude;
         float b = 2 * Vector3.Dot(asteroidVelocity, earthToAsteroid);
-        float c = earthToAsteroid.magnitude - Mathf.Pow(safetyZoneRadius, 2);
+        float c = earthToAsteroid.sqrMagnitude - Mathf.Pow(safetyZoneRadius, 2);
 
         float discriminant = Mathf.Pow(b, 2) - 4 * a * c;
 
@@ -124,9 +124,9 @@ public class GameController : MonoBehaviour
         Vector3 earthCenter = Earth.position;
 
         Vector3 directionToAsteroid = Vector3.Normalize(asteroidPosition - earthCenter);
-        Vector3 asteroidVelocityOrthogonal = Vector3.Dot(asteroidVelocity, directionToAsteroid) * directionToAsteroid;
+        Vector3 asteroidVelocityPar = Vector3.Dot(asteroidVelocity, directionToAsteroid) * directionToAsteroid;
 
-        Vector3 asteroidVelocityTangential = asteroidVelocity - asteroidVelocityOrthogonal;
+        Vector3 asteroidVelocityTangential = asteroidVelocity - asteroidVelocityPar;
 
         Vector3 missileVelocityTangential = asteroidVelocityTangential;
 
